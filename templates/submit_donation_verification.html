@@ -1,0 +1,8 @@
+{% extends "base.html" %} {% block title %}Submit Donation{% endblock %} {%
+block content %}
+<h3>Submit Donation for Verification</h3>
+<form method="POST" class="form">
+  {% csrf_token %} {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Submit Donation</button>
+</form>
+{% endblock %}
