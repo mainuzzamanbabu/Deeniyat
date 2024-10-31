@@ -10,13 +10,18 @@ from django.db.models import Sum
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
+        print(form)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('dashboard')
+        else:
+            messages.error(request, "There was an error in the form. Please correct it.")
     else:
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
+
+from django.contrib import messages
 
 def user_login(request):
     if request.method == 'POST':
@@ -26,6 +31,8 @@ def user_login(request):
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')
+        else:
+            messages.error(request, "Your username or password is incorrect")
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
@@ -39,7 +46,12 @@ def dashboard(request):
     tasks = DailyTask.objects.filter(user=request.user)
     donations = Donation.objects.filter(user=request.user)
     total_donations = donations.aggregate(Sum('amount'))['amount__sum'] or 0
-    return r
+    return render(request, 'dashboard.html', {
+        'tasks': tasks,
+        'donations': donations,
+        'total_donations': total_donations
+    })
+
 @login_required
 def submit_daily_task(request):
     if request.method == "POST":
