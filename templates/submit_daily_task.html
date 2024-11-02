@@ -1,8 +1,43 @@
 {% extends "base.html" %} {% block title %}Submit Daily Task{% endblock title %}
 {% block content %}
-<h3>Daily Task Submission</h3>
-<form method="POST" class="form">
-  {% csrf_token %} {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Submit Task</button>
-</form>
+<div class="container mt-5">
+  <h3 class="mb-4">Daily Task Submission</h3>
+  <form method="POST" class="form">
+    {% csrf_token %}
+
+    <div class="form-group mb-3">{{ form.date.label_tag }} {{ form.date }}</div>
+
+    <h5>Salat Status</h5>
+    <div class="form-group mb-3">
+      {{ form.fajr_status.label_tag }} {{ form.fajr_status }}
+    </div>
+    <div class="form-group mb-3">
+      {{ form.dhuhr_status.label_tag }} {{ form.dhuhr_status }}
+    </div>
+    <div class="form-group mb-3">
+      {{ form.asr_status.label_tag }} {{ form.asr_status }}
+    </div>
+    <div class="form-group mb-3">
+      {{ form.maghrib_status.label_tag }} {{ form.maghrib_status }}
+    </div>
+    <div class="form-group mb-3">
+      {{ form.isha_status.label_tag }} {{ form.isha_status }}
+    </div>
+
+    <h5>Other Activities</h5>
+    <div class="form-group mb-3">
+      {{ form.quran_reading.label_tag }} {{ form.quran_reading }}
+    </div>
+    <div class="form-check mb-3">
+      {{ form.masnoon_amol }} {{ form.masnoon_amol.label_tag }}
+    </div>
+    <div class="form-check mb-3">
+      {{ form.reading_hadith }} {{ form.reading_hadith.label_tag }}
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg mt-3">
+      Submit Task
+    </button>
+  </form>
+</div>
 {% endblock content %}

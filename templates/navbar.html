@@ -27,9 +27,20 @@
             >Superadmin Dashboard</a
           >
         </li>
-        {% endif %}
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'approve_donation' %}"
+            >Approve Donation</a
+          >
+        </li>
+
+        {% if user.is_authenticated and user.username == "accounts" %}
+        <p>Hi</p>
+        {% endif %} {% endif %}
       </ul>
-      <span class="navbar-text me-3">Logged in as: {{ user.username }}</span>
+      <li>{{ request.total_donations }}</li>
+
+      <span class="navbar-text me-3"> Logged in as: {{ user.username }} </span>
       <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}"
         >Logout</a
       >

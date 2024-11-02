@@ -1,8 +1,30 @@
-{% extends "base.html" %} {% block title %}Submit Daily Task{% endblock title %}
-{% block content %}
-<h3>Submit Donation</h3>
-<form method="POST" class="form">
-  {% csrf_token %} {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Submit Donation</button>
-</form>
-{% endblock %}
+{% extends "base.html" %} {% block content %}
+<div class="container d-flex justify-content-center mt-5">
+  <div class="col-md-6">
+    <h3 class="text-center mb-4">Submit Donation</h3>
+    <form method="POST" class="form">
+      {% csrf_token %}
+
+      <div class="form-group mb-3">
+        {{ form.transaction_id.label_tag }} {{ form.transaction_id }}
+      </div>
+
+      <div class="form-group mb-3">
+        {{ form.amount.label_tag }} {{ form.amount }}
+      </div>
+
+      <div class="form-group mb-3">
+        {{ form.payment_date.label_tag }} {{ form.payment_date }}
+      </div>
+
+      <div class="form-group mb-3">
+        {{ form.payment_month.label_tag }} {{ form.payment_month }}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        Submit Donation
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock content %} {% block title %}Submit Donation{% endblock title %}
