@@ -8,6 +8,7 @@ from django.contrib.auth.models import User  # Import the User model
 from django.db.models import Sum
 from django.contrib.auth.models import Group
 
+from datetime import datetime
 
 def donation_total(request):
     if request.user.is_authenticated:
@@ -117,8 +118,8 @@ def approve_donation(request):
         donation.verified = True
         donation.verified_by = request.user
         donation.save()
-        return redirect("approve_donation")
-    return render(request, "approve_donation.html", {"donations": donations})
+        return redirect("accounts_admin_dashboard")
+    return render(request, "accounts_admin_dashboard.html", {"donations": donations})
 
 
 from django.views.decorators.http import require_POST
@@ -142,12 +143,100 @@ def edit_donation(request):
     
     return redirect("approve_donation")
 
+@require_POST
+@login_required
+@user_passes_test(is_superuser_or_accounts)
+def edit_donation_accounts(request):
+    donation_id = request.POST.get("donation_id")
+    amount = request.POST.get("amount")
+    transaction_id = request.POST.get("transaction_id")
+    
+    try:
+        donation = Donation.objects.get(id=donation_id)
+        donation.amount = amount
+        donation.transaction_id = transaction_id
+        donation.save()
+        messages.success(request, "Donation updated successfully.")
+    except Donation.DoesNotExist:
+        messages.error(request, "Donation not found.")
+    
+    return redirect("accounts_admin_dashboard")
+
+# @login_required
+# @user_passes_test(lambda u: u.groups.filter(name='accounts').exists() or u.is_superuser)
+# def accounts_admin_dashboard(request):
+#     all_data = {
+#         'users': User.objects.all(),
+#         'tasks': DailyTask.objects.all(),
+#         'donations': Donation.objects.all(),
+#     }
+#     return render(request, 'accounts_admin_dashboard.html', all_data)
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='accounts').exists() or u.is_superuser)
 def accounts_admin_dashboard(request):
-    all_data = {
+    # Get all donations initially
+    donations = Donation.objects.all()
+    
+    # Get filter parameters from request
+    user_filter = request.GET.get('user')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    payment_month = request.GET.get('payment_month')
+    status = request.GET.get('status')
+    min_amount = request.GET.get('min_amount')
+    max_amount = request.GET.get('max_amount')
+
+    # Apply filters
+    if user_filter:
+        donations = donations.filter(user__username__icontains=user_filter)
+    
+    if date_from:
+        try:
+            date_from = datetime.strptime(date_from, '%Y-%m-%d').date()
+            donations = donations.filter(payment_date__gte=date_from)
+        except ValueError:
+            pass
+
+    if date_to:
+        try:
+            date_to = datetime.strptime(date_to, '%Y-%m-%d').date()
+            donations = donations.filter(payment_date__lte=date_to)
+        except ValueError:
+            pass
+
+    if payment_month and payment_month != 'all':
+        donations = donations.filter(payment_month=payment_month)
+
+    if status and status != 'all':
+        donations = donations.filter(verified=(status == 'verified'))
+
+    if min_amount:
+        try:
+            donations = donations.filter(amount__gte=float(min_amount))
+        except ValueError:
+            pass
+
+    if max_amount:
+        try:
+            donations = donations.filter(amount__lte=float(max_amount))
+        except ValueError:
+            pass
+
+    context = {
+        'donations': donations,
         'users': User.objects.all(),
         'tasks': DailyTask.objects.all(),
-        'donations': Donation.objects.all(),
+        'months_choices': Donation.MONTH_CHOICES,
+        # Add current filter values to context for form persistence
+        'current_filters': {
+            'user': user_filter or '',
+            'date_from': date_from or '',
+            'date_to': date_to or '',
+            'payment_month': payment_month or 'all',
+            'status': status or 'all',
+            'min_amount': min_amount or '',
+            'max_amount': max_amount or '',
+        }
     }
-    return render(request, 'accounts_admin_dashboard.html', all_data)
+    
+    return render(request, 'accounts_admin_dashboard.html', context)

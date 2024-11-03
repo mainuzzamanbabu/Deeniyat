@@ -12,5 +12,5 @@ urlpatterns = [
     path('superadmin-dashboard/', views.superadmin_dashboard, name='superadmin_dashboard'),
     path('edit-donation/', views.edit_donation, name='edit_donation'),
     path('accounts-admin-dashboard/', views.accounts_admin_dashboard, name='accounts_admin_dashboard'),
-
+    path('edit-donation-accounts/', views.edit_donation_accounts, name='edit_donation_accounts'),
 ]
