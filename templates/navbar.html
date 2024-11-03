@@ -33,7 +33,11 @@
             >Approve Donation</a
           >
         </li>
-
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts_admin_dashboard' %}"
+            >Accounts Dashboard</a
+          >
+        </li>
         {% endif %}
         <p></p>
         {% if user.is_authenticated and user.username == "accounts" %}
@@ -50,9 +54,16 @@
         {% endif %}
       </ul>
 
-      <li>{{ request.total_donations }}</li>
+      <!-- <li>{{ request.total_donations }}</li> -->
 
       <span class="navbar-text me-3"> Logged in as: {{ user.username }} </span>
+      <!-- {% if user.is_superuser or user.username == "accounts" %}
+      <li class="nav-item">
+        <span class="navbar-text"
+          >Total Donations: {{ total_donations }} BDT</span
+        >
+      </li>
+      {% endif %} -->
       <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}"
         >Logout</a
       >

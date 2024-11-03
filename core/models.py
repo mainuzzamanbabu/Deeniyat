@@ -1,12 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.db.models import Sum
 
-# class DailyTask(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
-#     date = models.DateField(default=timezone.now)
-#     salat_status = models.CharField(max_length=10, choices=[("Jamat", "Jamat"), ("Alone", "Alone"), ("Kazah", "Kazah")])
-#     quran_reading = models.CharField(max_length=50, choices=[("Yes", "Yes"), ("No", "No"), ("Unable", "I don't able to read Quran")])
 class DailyTask(models.Model):
     SALAT_CHOICES = [
         ("Jamat", "Jamat"),
@@ -58,3 +56,40 @@ class Donation(models.Model):
 
     def __str__(self):
         return f"Donation by {self.user.username} - {self.amount}"
+
+class DonationSummary(models.Model):
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    donation_count = models.PositiveIntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Total Donations: {self.total_amount} - Count: {self.donation_count}"
+
+@receiver(post_save, sender=Donation)
+def update_donation_summary_on_save(sender, instance, created, **kwargs):
+    summary, _ = DonationSummary.objects.get_or_create(id=1)
+
+    if created:
+        if instance.verified:
+            summary.total_amount += instance.amount
+            summary.donation_count += 1
+            summary.save()
+    else:
+        previous_instance = Donation.objects.get(id=instance.id)
+        if not previous_instance.verified and instance.verified:
+            summary.total_amount += instance.amount
+            summary.donation_count += 1
+            summary.save()
+        elif previous_instance.verified and not instance.verified:
+            summary.total_amount -= instance.amount
+            summary.donation_count -= 1
+            summary.save()
+
+@receiver(post_delete, sender=Donation)
+def update_donation_summary_on_delete(sender, instance, **kwargs):
+    summary, _ = DonationSummary.objects.get_or_create(id=1)
+
+    # Recalculate total and count after deletion
+    summary.total_amount = Donation.objects.filter(verified=True).aggregate(total=Sum('amount'))['total'] or 0
+    summary.donation_count = Donation.objects.filter(verified=True).count()
+    summary.save()

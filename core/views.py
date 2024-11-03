@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import UserRegistrationForm, DailyTaskForm, DonationVerificationForm
-from .models import DailyTask, Donation
+from .models import DailyTask, Donation, DonationSummary
 from django.contrib.auth.models import User  # Import the User model
 from django.db.models import Sum
 from django.contrib.auth.models import Group
@@ -108,18 +108,18 @@ def superadmin_dashboard(request):
 def is_superuser_or_accounts(user):
     return user.is_superuser or user.groups.filter(name='accounts').exists()
 
-@login_required
-@user_passes_test(is_superuser_or_accounts)
-def approve_donation(request):
-    donations = Donation.objects.filter(verified=False)
-    if request.method == "POST":
-        donation_id = request.POST.get("donation_id")
-        donation = Donation.objects.get(id=donation_id)
-        donation.verified = True
-        donation.verified_by = request.user
-        donation.save()
-        return redirect("accounts_admin_dashboard")
-    return render(request, "accounts_admin_dashboard.html", {"donations": donations})
+# @login_required
+# @user_passes_test(is_superuser_or_accounts)
+# def approve_donation(request):
+#     donations = Donation.objects.filter(verified=False)
+#     if request.method == "POST":
+#         donation_id = request.POST.get("donation_id")
+#         donation = Donation.objects.get(id=donation_id)
+#         donation.verified = True
+#         donation.verified_by = request.user
+#         donation.save()
+#         return redirect("accounts_admin_dashboard")
+#     return render(request, "accounts_admin_dashboard.html", {"donations": donations})
 
 
 from django.views.decorators.http import require_POST
@@ -240,3 +240,51 @@ def accounts_admin_dashboard(request):
     }
     
     return render(request, 'accounts_admin_dashboard.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='accounts').exists() or u.is_superuser)
+def accounts_admin_dashboard(request):
+    donations = Donation.objects.all()
+    
+    # Get the donation summary (assume a single record with id=1 exists)
+    donation_summary = DonationSummary.objects.first()
+    total_donations = donation_summary.total_amount if donation_summary else 0
+    donation_count = donation_summary.donation_count if donation_summary else 0
+
+    context = {
+        'donations': donations,
+        'total_donations': total_donations,
+        'donation_count': donation_count,
+        # Other context data
+    }
+    return render(request, 'accounts_admin_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='accounts').exists())
+def approve_donation(request):
+    donations = Donation.objects.filter(verified=False)
+    
+    if request.method == "POST":
+        donation_id = request.POST.get("donation_id")
+        donation = get_object_or_404(Donation, id=donation_id)
+        
+        if not donation.verified:
+            # Mark the donation as verified
+            donation.verified = True
+            donation.verified_by = request.user
+            donation.save()
+
+            # Update DonationSummary
+            summary, created = DonationSummary.objects.get_or_create(id=1)
+            summary.total_amount += donation.amount
+            summary.donation_count += 1
+            summary.save()
+
+            messages.success(request, "Donation approved and summary updated.")
+        else:
+            messages.warning(request, "Donation is already verified.")
+
+        return redirect("accounts_admin_dashboard")
+    
+    return render(request, "approve_donation.html", {"donations": donations})
