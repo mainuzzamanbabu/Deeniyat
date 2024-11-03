@@ -1,40 +1,52 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg" style="background-color: #1a262f">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'dashboard' %}">Deeniyat</a>
+    <a class="navbar-brand" style="color: #e5d1a7" href="{% url 'dashboard' %}"
+      >Deeniyat</a
+    >
     <button
       class="navbar-toggler"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarNav"
+      style="border-color: #e5d1a7"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'submit_daily_task' %}"
+          <a
+            class="nav-link custom-nav-link"
+            href="{% url 'submit_daily_task' %}"
             >Submit Daily Task</a
           >
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'submit_donation_verification' %}"
+          <a
+            class="nav-link custom-nav-link"
+            href="{% url 'submit_donation_verification' %}"
             >Submit Donation</a
           >
         </li>
         {% if user.is_superuser %}
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'superadmin_dashboard' %}"
+          <a
+            class="nav-link custom-nav-link"
+            href="{% url 'superadmin_dashboard' %}"
             >Superadmin Dashboard</a
           >
         </li>
-
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'approve_donation' %}"
+          <a
+            class="nav-link custom-nav-link"
+            href="{% url 'approve_donation' %}"
             >Approve Donation</a
           >
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'accounts_admin_dashboard' %}"
+          <a
+            class="nav-link custom-nav-link"
+            href="{% url 'accounts_admin_dashboard' %}"
             >Accounts Dashboard</a
           >
         </li>
@@ -42,31 +54,62 @@
         <p></p>
         {% if user.is_authenticated and user.username == "accounts" %}
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'approve_donation' %}"
+          <a
+            class="nav-link custom-nav-link"
+            href="{% url 'approve_donation' %}"
             >Approve Donation</a
           >
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'accounts_admin_dashboard' %}"
+          <a
+            class="nav-link custom-nav-link"
+            href="{% url 'accounts_admin_dashboard' %}"
             >Accounts Dashboard</a
           >
         </li>
         {% endif %}
       </ul>
 
-      <!-- <li>{{ request.total_donations }}</li> -->
-
-      <span class="navbar-text me-3"> Logged in as: {{ user.username }} </span>
-      <!-- {% if user.is_superuser or user.username == "accounts" %}
-      <li class="nav-item">
-        <span class="navbar-text"
-          >Total Donations: {{ total_donations }} BDT</span
-        >
-      </li>
-      {% endif %} -->
-      <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}"
-        >Logout</a
-      >
+      <span class="navbar-text me-3" style="color: #e5d1a7">
+        Logged in as: {{ user.username }}
+      </span>
+      <a class="btn custom-btn" href="{% url 'logout' %}">Logout</a>
     </div>
   </div>
 </nav>
+
+<style>
+  :root {
+    --brand-dark: #1a262f;
+    --brand-gold: #e5d1a7;
+  }
+
+  .custom-nav-link {
+    color: var(--brand-gold) !important;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .custom-nav-link:hover {
+    background-color: rgba(229, 209, 167, 0.1);
+    color: var(--brand-gold) !important;
+  }
+
+  .custom-btn {
+    background-color: var(--brand-gold);
+    color: var(--brand-dark);
+    border: 1px solid var(--brand-gold);
+    transition: all 0.3s ease;
+  }
+
+  .custom-btn:hover {
+    background-color: transparent;
+    color: var(--brand-gold);
+    transform: translateY(-1px);
+  }
+
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(229, 209, 167, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+</style>

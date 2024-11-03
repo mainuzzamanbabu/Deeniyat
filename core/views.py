@@ -176,7 +176,7 @@ def edit_donation_accounts(request):
 def accounts_admin_dashboard(request):
     # Get all donations initially
     donations = Donation.objects.all()
-    
+    print("ddd",donations)
     # Get filter parameters from request
     user_filter = request.GET.get('user')
     date_from = request.GET.get('date_from')
@@ -203,7 +203,7 @@ def accounts_admin_dashboard(request):
             donations = donations.filter(payment_date__lte=date_to)
         except ValueError:
             pass
-
+    
     if payment_month and payment_month != 'all':
         donations = donations.filter(payment_month=payment_month)
 
@@ -221,12 +221,17 @@ def accounts_admin_dashboard(request):
             donations = donations.filter(amount__lte=float(max_amount))
         except ValueError:
             pass
-
+    donation_summary = DonationSummary.objects.first()
+    total_donations = donation_summary.total_amount if donation_summary else 0
+    donation_count = donation_summary.donation_count if donation_summary else 0
     context = {
         'donations': donations,
         'users': User.objects.all(),
         'tasks': DailyTask.objects.all(),
         'months_choices': Donation.MONTH_CHOICES,
+        'total_donations': total_donations,
+        'donation_count': donation_count,
+
         # Add current filter values to context for form persistence
         'current_filters': {
             'user': user_filter or '',
@@ -241,23 +246,23 @@ def accounts_admin_dashboard(request):
     
     return render(request, 'accounts_admin_dashboard.html', context)
 
-@login_required
-@user_passes_test(lambda u: u.groups.filter(name='accounts').exists() or u.is_superuser)
-def accounts_admin_dashboard(request):
-    donations = Donation.objects.all()
+# @login_required
+# @user_passes_test(lambda u: u.groups.filter(name='accounts').exists() or u.is_superuser)
+# def accounts_admin_dashboard(request):
+#     donations = Donation.objects.all()
     
-    # Get the donation summary (assume a single record with id=1 exists)
-    donation_summary = DonationSummary.objects.first()
-    total_donations = donation_summary.total_amount if donation_summary else 0
-    donation_count = donation_summary.donation_count if donation_summary else 0
+#     # Get the donation summary (assume a single record with id=1 exists)
+#     donation_summary = DonationSummary.objects.first()
+#     total_donations = donation_summary.total_amount if donation_summary else 0
+#     donation_count = donation_summary.donation_count if donation_summary else 0
 
-    context = {
-        'donations': donations,
-        'total_donations': total_donations,
-        'donation_count': donation_count,
-        # Other context data
-    }
-    return render(request, 'accounts_admin_dashboard.html', context)
+#     context = {
+#         'donations': donations,
+#         'total_donations': total_donations,
+#         'donation_count': donation_count,
+#         # Other context data
+#     }
+#     return render(request, 'accounts_admin_dashboard.html', context)
 
 
 @login_required
