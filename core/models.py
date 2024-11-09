@@ -45,7 +45,12 @@ class Donation(models.Model):
         ('11', 'November'),
         ('12', 'December'),
     ]
-
+    PAYMENT_METHOD_CHOICES = [
+        ('Cash', 'Cash'),
+        ('Bkash', 'Bkash'),
+        ('Nagad', 'Nagad'),
+        ('Other', 'Other'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="donations")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     transaction_id = models.CharField(max_length=50)
@@ -53,6 +58,7 @@ class Donation(models.Model):
     verified_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="verified_donations")
     payment_date = models.DateField(default=timezone.now)  # Field for payment date
     payment_month = models.CharField(max_length=2, choices=MONTH_CHOICES)  # Field for payment month selection
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES)  # New field
 
     def __str__(self):
         return f"Donation by {self.user.username} - {self.amount}"
@@ -93,3 +99,19 @@ def update_donation_summary_on_delete(sender, instance, **kwargs):
     summary.total_amount = Donation.objects.filter(verified=True).aggregate(total=Sum('amount'))['total'] or 0
     summary.donation_count = Donation.objects.filter(verified=True).count()
     summary.save()
+
+class Constitution(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.title
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    accepted_constitution = models.BooleanField(default=False)
+    acceptance_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username}'s profile"

@@ -5,7 +5,17 @@
     <form method="POST" class="form">
       {% csrf_token %}
 
+      <!-- Payment Method Field -->
       <div class="form-group mb-3">
+        {{ form.payment_method.label_tag }} {{ form.payment_method }}
+      </div>
+
+      <!-- Transaction ID Field (conditionally displayed) -->
+      <div
+        class="form-group mb-3"
+        id="transaction-id-group"
+        style="display: none"
+      >
         {{ form.transaction_id.label_tag }} {{ form.transaction_id }}
       </div>
 
@@ -27,4 +37,23 @@
     </form>
   </div>
 </div>
+
+<!-- JavaScript to show/hide Transaction ID based on Payment Method -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const paymentMethodField = document.querySelector("#id_payment_method");
+    const transactionIdGroup = document.querySelector("#transaction-id-group");
+
+    function toggleTransactionIdField() {
+      if (paymentMethodField.value === "Cash") {
+        transactionIdGroup.style.display = "none";
+      } else {
+        transactionIdGroup.style.display = "block";
+      }
+    }
+
+    paymentMethodField.addEventListener("change", toggleTransactionIdField);
+    toggleTransactionIdField(); // Initial check based on the default value
+  });
+</script>
 {% endblock content %} {% block title %}Submit Donation{% endblock title %}

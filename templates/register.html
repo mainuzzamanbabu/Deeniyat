@@ -74,7 +74,29 @@
                 >
                 {{ form.password2 }}
               </div>
-
+              <!-- Constitution Acceptance -->
+              <div class="form-outline mb-3 w-100">
+                <div class="form-check">
+                  {{ form.accept_constitution }}
+                  <label
+                    class="form-check-label text-white"
+                    for="accept_constitution"
+                  >
+                    I have read and accept the
+                    <a
+                      href="{% url 'constitution' %}"
+                      target="_blank"
+                      class="text-primary"
+                      >Deeniyat Constitution</a
+                    >
+                  </label>
+                </div>
+                {% if form.accept_constitution.errors %}
+                <div class="text-danger">
+                  {{ form.accept_constitution.errors|join:", " }}
+                </div>
+                {% endif %}
+              </div>
               <div class="text-center">
                 <button
                   type="submit"

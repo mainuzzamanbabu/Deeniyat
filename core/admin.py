@@ -6,3 +6,6 @@ from core.models import DailyTask, Donation, DonationSummary
 admin.site.register(DailyTask)
 admin.site.register(Donation)
 admin.site.register(DonationSummary)
+from .models import Constitution
+
+admin.site.register(Constitution)

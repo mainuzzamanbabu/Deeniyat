@@ -293,3 +293,20 @@ def approve_donation(request):
         return redirect("accounts_admin_dashboard")
     
     return render(request, "approve_donation.html", {"donations": donations})
+
+from .models import Constitution
+from django.views.generic import TemplateView
+class ConstitutionView(TemplateView):
+    template_name = 'constitution.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        constitution = Constitution.objects.first()  # Assuming you have one constitution
+        if not constitution:
+            # Create the constitution if it doesn't exist
+            constitution = Constitution.objects.create(
+                title="দ্বীনিয়াত সংবিধান",
+                content="""[Your constitution text here]"""
+            )
+        context['constitution'] = constitution
+        return context
